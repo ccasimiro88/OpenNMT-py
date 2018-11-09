@@ -3,9 +3,9 @@
 from __future__ import division
 import six
 import sys
-import numpy as np
 import argparse
 import torch
+import torch.nn as nn
 from onmt.utils.logging import init_logger, logger
 from onmt.inputters.inputter import _old_style_vocab
 
@@ -53,18 +53,24 @@ def read_embeddings(file_enc, skip_lines=0):
 
 def match_embeddings(vocab, emb, opt):
     dim = len(six.next(six.itervalues(emb)))
-    filtered_embeddings = np.zeros((len(vocab), dim))
+
+    filtered_embeddings = torch.empty((len(vocab), dim))
+    if opt.non_match_embs_init == 'zero':
+        nn.init.constant_(filtered_embeddings, 0)
+    elif opt.non_match_embs_init == 'normal':
+        nn.init.normal_(filtered_embeddings)
+
     count = {"match": 0, "miss": 0}
     for w, w_id in vocab.stoi.items():
         if w in emb:
-            filtered_embeddings[w_id] = emb[w]
+            filtered_embeddings[w_id] = torch.Tensor(emb[w])  #convert list to tensor in order to assign
             count['match'] += 1
         else:
             if opt.verbose:
                 logger.info(u"not found:\t{}".format(w), file=sys.stderr)
             count['miss'] += 1
 
-    return torch.Tensor(filtered_embeddings), count
+    return filtered_embeddings, count
 
 
 def main():
@@ -83,6 +89,7 @@ def main():
                         help="Skip first lines of the embedding file")
     parser.add_argument('-type', choices=["GloVe", "word2vec"],
                         default="GloVe")
+    parser.add_argument('-non_match_embs_init', default='zero')
     opt = parser.parse_args()
 
     enc_vocab, dec_vocab = get_vocabs(opt.dict_file)
@@ -112,7 +119,8 @@ def main():
                    dec_count['miss'],
                    match_percent[1]))
 
-    logger.info("\nFiltered embeddings:")
+    logger.info("\nFiltered embeddings with \"%s\" initialization for non-matching embeddings:",
+                opt.non_match_embs_init)
     logger.info("\t* enc: %s" % str(filtered_enc_embeddings.size()))
     logger.info("\t* dec: %s" % str(filtered_dec_embeddings.size()))
 
