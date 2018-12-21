@@ -39,7 +39,11 @@ class Elementwise(nn.ModuleList):
 
     def forward(self, inputs):
         inputs_ = [feat.squeeze(2) for feat in inputs.split(1, dim=2)]
-        assert len(self) == len(inputs_)
+
+        # In the case of extra look-up table just duplicate the input many times
+        # as the lenght of module list instead of expecting an input with features
+        if len(self) != len(inputs_):
+            inputs_ = inputs_ * len(self)
         outputs = [f(x) for f, x in zip(self, inputs_)]
         if self.merge == 'first':
             return outputs[0]

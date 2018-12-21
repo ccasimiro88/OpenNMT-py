@@ -31,6 +31,8 @@ def model_opts(parser):
                        help="""Use a sin to mark relative words positions.
                        Necessary for non-RNN style models.
                        """)
+    group.add_argument('-extra_word_embeddings', action='store_true',
+                       help="""Use extra word embeddings""")
 
     group = parser.add_argument_group('Model-Embedding Features')
     group.add_argument('-feat_merge', type=str, default='concat',
@@ -314,6 +316,8 @@ def train_opts(parser):
                        help="""If a valid path is specified, then this will load
                        pretrained word embeddings on the decoder side.
                        See README for specific formatting instructions.""")
+    group.add_argument('-pre_extra_word_lut', action='store_true',
+                       help="""Use fixed extra word embeddings""")
     # Fixed word vectors
     group.add_argument('-fix_word_vecs_enc',
                        action='store_true',
