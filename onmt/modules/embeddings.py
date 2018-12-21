@@ -89,7 +89,7 @@ class Embeddings(nn.Module):
     def __init__(self, word_vec_size,
                  word_vocab_size,
                  word_padding_idx,
-                 extra_word_embeddings,
+                 extra_word_vecs,
                  position_encoding=False,
                  feat_merge="concat",
                  feat_vec_exponent=0.7, feat_vec_size=-1,
@@ -165,25 +165,23 @@ class Embeddings(nn.Module):
             pe = PositionalEncoding(dropout, self.embedding_size)
             self.make_embedding.add_module('pe', pe)
 
-        print("embeddings size:", embeddings)
-        print("EMB_LUT", emb_luts)
-
     @property
     def word_lut(self):
         """ word look-up table """
         return self.make_embedding[0][0]
 
     @property
-    def extra_word_lut(self):
-        """ Extra word look-up table"""
-        return self.make_embedding[0][-1]
-
-    @property
     def emb_luts(self):
         """ embedding look-up table """
         return self.make_embedding[0]
 
-    def load_pretrained_vectors(self, emb_file, fixed, pre_extra_word_lut):
+    @property
+    def extra_word_lut(self):
+        """ Extra word look-up table is the last if there are more than one look-up table"""
+        if len(self.emb_luts) > 1:
+            return self.make_embedding[0][-1]
+
+    def load_pretrained_vectors(self, emb_file, fixed, pre_extra_word_vecs):
         """Load in pretrained embeddings.
 
         Args:
@@ -191,25 +189,31 @@ class Embeddings(nn.Module):
           fixed (bool) : if true, embeddings are not updated
           pre_extra_word_lut (bool) : if true, pre-trained extra word embeddings are used
         """
-        # Select look-up table to apply pre-trained embeddings
-        if pre_extra_word_lut:
-            assert self.extra_word_lut, "Extra word look-up table not defined!"
-            word_lut = self.word_lut
-        else:
-            word_lut = self.extra_word_lut
-
         if emb_file:
             pretrained = torch.load(emb_file)
             pretrained_vec_size = pretrained.size(1)
-            if self.word_vec_size > pretrained_vec_size:
-                word_lut.weight.data[:, :pretrained_vec_size] = pretrained
-            elif self.word_vec_size < pretrained_vec_size:
-                word_lut.weight.data \
-                    .copy_(pretrained[:, :self.word_vec_size])
+            # Select look-up table to apply pre-trained embeddings
+            if pre_extra_word_vecs:
+                print("EXTRA_LUT", self.extra_word_lut)
+                assert self.extra_word_lut, "Extra word look-up table not defined!"
+                if self.word_vec_size > pretrained_vec_size:
+                    self.extra_word_lut.weight.data[:, :pretrained_vec_size] = pretrained
+                elif self.word_vec_size < pretrained_vec_size:
+                    self.extra_word_lut.weight.data.copy_(pretrained[:, :self.word_vec_size])
+                else:
+                    self.extra_word_lut.weight.data.copy_(pretrained)
+                if fixed:
+                    self.extra_word_lut.weight.requires_grad = False
+
             else:
-                word_lut.weight.data.copy_(pretrained)
-            if fixed:
-                word_lut.weight.requires_grad = False
+                if self.word_vec_size > pretrained_vec_size:
+                    self.word_lut.weight.data[:, :pretrained_vec_size] = pretrained
+                elif self.word_vec_size < pretrained_vec_size:
+                    self.word_lut.weight.data.copy_(pretrained[:, :self.word_vec_size])
+                else:
+                    self.word_lut.weight.data.copy_(pretrained)
+                if fixed:
+                    self.word_lut.weight.requires_grad = False
 
     def forward(self, source, step=None):
         """

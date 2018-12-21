@@ -48,7 +48,7 @@ def build_embeddings(opt, word_dict, feature_dicts, for_encoder=True):
                            feature_dicts]
 
     return Embeddings(word_vec_size=embedding_dim,
-                      extra_word_embeddings=opt.extra_word_embeddings,
+                      extra_word_vecs=opt.extra_word_vecs,
                       position_encoding=opt.position_encoding,
                       feat_merge=opt.feat_merge,
                       feat_vec_exponent=opt.feat_vec_exponent,
@@ -254,10 +254,10 @@ def build_base_model(model_opt, fields, gpu, checkpoint=None):
 
         if hasattr(model.encoder, 'embeddings'):
             model.encoder.embeddings.load_pretrained_vectors(
-                model_opt.pre_word_vecs_enc, model_opt.fix_word_vecs_enc, model_opt.pre_extra_word_lut)
+                model_opt.pre_word_vecs_enc, model_opt.fix_word_vecs_enc, model_opt.pre_extra_word_vecs_enc)
         if hasattr(model.decoder, 'embeddings'):
             model.decoder.embeddings.load_pretrained_vectors(
-                model_opt.pre_word_vecs_dec, model_opt.fix_word_vecs_dec, model_opt.pre_extra_word_lut)
+                model_opt.pre_word_vecs_dec, model_opt.fix_word_vecs_dec, model_opt.pre_extra_word_vecs_dec)
 
     # Add generator to model (this registers it as parameter of model).
     model.generator = generator
