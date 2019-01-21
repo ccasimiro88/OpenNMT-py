@@ -125,7 +125,7 @@ class Embeddings(nn.Module):
         # Dimensions and padding for extra word embedding matrix
         # assuming they have the same dimensions as the first word
         # look-up table
-        if extra_word_embeddings:
+        if extra_word_vecs:
             vocab_sizes.extend([word_vocab_size])
             emb_dims.extend([word_vec_size])
             pad_indices.extend([word_padding_idx])
