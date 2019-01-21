@@ -194,7 +194,6 @@ class Embeddings(nn.Module):
             pretrained_vec_size = pretrained.size(1)
             # Select look-up table to apply pre-trained embeddings
             if pre_extra_word_vecs:
-                print("EXTRA_LUT", self.extra_word_lut)
                 assert self.extra_word_lut, "Extra word look-up table not defined!"
                 if self.word_vec_size > pretrained_vec_size:
                     self.extra_word_lut.weight.data[:, :pretrained_vec_size] = pretrained
