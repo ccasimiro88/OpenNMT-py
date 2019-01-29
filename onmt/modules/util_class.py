@@ -33,17 +33,16 @@ class Elementwise(nn.ModuleList):
     """
 
     def __init__(self, merge=None, *args):
-        assert merge in [None, 'first', 'concat', 'sum', 'mlp']
+        assert merge in [None, 'first', 'concat', 'sum', 'mlp', 'sigmoidal_gate']
         self.merge = merge
         super(Elementwise, self).__init__(*args)
 
     def forward(self, inputs):
         inputs_ = [feat.squeeze(2) for feat in inputs.split(1, dim=2)]
 
-        # In the case of extra look-up table just duplicate the input many times
-        # as the lenght of module list instead of expecting an input with features
-        if len(self) != len(inputs_):
-            inputs_ = inputs_ * len(self)
+        # In the case of extra look-up table just append the word input at the end
+        if len(self) == len(inputs_) - 1:
+            inputs_ = [inputs_, inputs_[0]]
         outputs = [f(x) for f, x in zip(self, inputs_)]
         if self.merge == 'first':
             return outputs[0]
@@ -51,5 +50,9 @@ class Elementwise(nn.ModuleList):
             return torch.cat(outputs, 2)
         elif self.merge == 'sum':
             return sum(outputs)
+        elif self.merge == 'sigmoidal_gate':
+            # The sigmoidal gating mechanism is implemented: A x sigma(B)
+            # the first and the second outputs are the word representations of both the word lut and extra word lut
+            return torch.mul(outputs[0], torch.sigmoid(outputs[-1]))
         else:
             return outputs

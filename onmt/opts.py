@@ -36,7 +36,7 @@ def model_opts(parser):
 
     group = parser.add_argument_group('Model-Embedding Features')
     group.add_argument('-feat_merge', type=str, default='concat',
-                       choices=['concat', 'sum', 'mlp'],
+                       choices=['concat', 'sum', 'mlp', 'sigmoidal_gate'],
                        help="""Merge action for incorporating features embeddings.
                        Options [concat|sum|mlp].""")
     group.add_argument('-feat_vec_size', type=int, default=-1,
