@@ -31,8 +31,10 @@ def model_opts(parser):
                        help="""Use a sin to mark relative words positions.
                        Necessary for non-RNN style models.
                        """)
-    group.add_argument('-extra_word_vecs', action='store_true',
-                       help="""Use extra word embeddings""")
+    group.add_argument('-extra_word_vecs_enc', action='store_true',
+                       help="""Use extra word embeddings on the encoder side""")
+    group.add_argument('-extra_word_vecs_dec', action='store_true',
+                       help="""Use extra word embeddings on the decoder side""")
 
     group = parser.add_argument_group('Model-Embedding Features')
     group.add_argument('-feat_merge', type=str, default='concat',
@@ -317,17 +319,17 @@ def train_opts(parser):
                        pretrained word embeddings on the decoder side.
                        See README for specific formatting instructions.""")
     group.add_argument('-pre_extra_word_vecs_enc', action='store_true',
-                       help="""Use fixed extra word embeddings for encoder side""")
+                       help="""Use pretrained embeddings for extra word lookup table on the encoder side""")
     group.add_argument('-pre_extra_word_vecs_dec', action='store_true',
-                       help="""Use fixed extra word embeddings for decoder side""")
+                       help="""Use pretrained embeddings for extra word lookup table on the decoder side""")
 
     # Fixed word vectors
     group.add_argument('-fix_word_vecs_enc',
                        action='store_true',
-                       help="Fix word embeddings on the encoder side.")
+                       help="Fix pretrained word embeddings on the encoder side.")
     group.add_argument('-fix_word_vecs_dec',
                        action='store_true',
-                       help="Fix word embeddings on the decoder side.")
+                       help="Fix pretrained sword embeddings on the decoder side.")
 
     # Optimization options
     group = parser.add_argument_group('Optimization- Type')

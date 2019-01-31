@@ -36,7 +36,9 @@ def build_embeddings(opt, word_dict, feature_dicts, for_encoder=True):
     """
     if for_encoder:
         embedding_dim = opt.src_word_vec_size
+        extra_word_vecs = opt.extra_word_vecs_enc
     else:
+        extra_word_vecs = opt.extra_word_vecs_dec
         embedding_dim = opt.tgt_word_vec_size
 
     word_padding_idx = word_dict.stoi[inputters.PAD_WORD]
@@ -48,7 +50,7 @@ def build_embeddings(opt, word_dict, feature_dicts, for_encoder=True):
                            feature_dicts]
 
     return Embeddings(word_vec_size=embedding_dim,
-                      extra_word_vecs=opt.extra_word_vecs,
+                      extra_word_vecs=extra_word_vecs,
                       position_encoding=opt.position_encoding,
                       feat_merge=opt.feat_merge,
                       feat_vec_exponent=opt.feat_vec_exponent,
