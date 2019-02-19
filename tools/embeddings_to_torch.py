@@ -71,6 +71,12 @@ def match_embeddings(vocab, emb, opt):
             count['miss'] += 1
 
     return filtered_embeddings, count
+<<<<<<< HEAD
+=======
+
+
+TYPES = ["GloVe", "word2vec"]
+>>>>>>> b4615c8b08b9e7865ff426b291761e43524b943d
 
 
 def main():
